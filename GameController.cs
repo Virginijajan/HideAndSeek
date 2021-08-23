@@ -52,26 +52,37 @@ namespace HideAndSeek
         }
 
         public string ParseInput(string input)
-        {
+        { 
             if (input.Count()>=4&&input.ToUpper().Substring(0,4) == "SAVE")
             {
-                savedGame.SaveGame(input.Substring(5), this);
+                var fileName = input.Substring(5);
+                fileName = fileName.Trim();
+
+                if (!ParseFileName(fileName)) return "Invalid file name";
+
+                savedGame.SaveGame(fileName, this);
                 CurrentLocation = House.Entry;
                 MoveNumber = 1;
-               foundOpponents = new List<Opponent>();
+                foundOpponents = new List<Opponent>();
                 House.ClearHidingPlaces();
                 foreach (var opponent in Opponents)
                     opponent.Hide();
                 UpdateStatus();
                 
-                return ($"Saved current game to {input.Substring(5)}");
+                return ($"Saved current game to {fileName}");
             }
             if (input.Count() >= 4 && input.ToUpper().Substring(0, 4) == "LOAD")
             {
-                savedGame.LoadGame(input.Substring(5), this);
-                UpdateStatus();
+                var fileName = input.Substring(5);
+                fileName = fileName.Trim();
+                if (!ParseFileName(fileName)) return "Invalid file name";
 
-                return ($"Loaded game from {input.Substring(5)}");
+                if (savedGame.LoadGame(fileName, this) == true)
+                {
+                    UpdateStatus();
+                    return ($"Loaded game from {fileName}");
+                }
+                else return "Invalid file name";
             }
             if (input.ToUpper() == "CHECK")
             {
@@ -124,6 +135,25 @@ namespace HideAndSeek
             {
                 statusUpdate += Environment.NewLine+"You have found " + foundOpponents.Count + " of " + Opponents.Count() + " opponents: " + string.Join(", ", foundOpponents.Select(o => o.Name).ToList());
             }
+        }
+
+       public bool ParseFileName(string fileName)
+        {
+            List<char> prohibitedChar = new List<char>() {'/', '\\', '*','%', '?', ':', '|', '"', 
+            '<', '>', '.', ',', ';', '=', ' '};
+            
+            if (fileName.Count() > 0&&fileName.Count()<20)
+            {
+                foreach(var character in prohibitedChar)
+                {
+                    if (fileName.Contains(character))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
     }
 }

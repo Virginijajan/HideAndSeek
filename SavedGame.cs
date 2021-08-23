@@ -12,14 +12,17 @@ namespace HideAndSeek
     {
         public string PlayersLocation { get; set; }
         public Dictionary<string, string> HidingOpponents { get; set; } = new Dictionary<string, string>();
-        public List<string> FoundOpponentsNames { get; set; } = new List<string>();
+        public List<string> FoundOpponentsNames { get; set; }
         public int MoveNumber { get; set; }
 
         
         public void SaveGame(string fileName, GameController gameController)
         {
+            
+            
             PlayersLocation = gameController.CurrentLocation.Name;
-            MoveNumber = gameController.MoveNumber;          
+            MoveNumber = gameController.MoveNumber;
+            FoundOpponentsNames = new List<string>();
             FoundOpponentsNames.AddRange(gameController.foundOpponents.Select(o => o.Name).ToList());
             HidingOpponents = new Dictionary<string, string>();
            
@@ -41,18 +44,23 @@ namespace HideAndSeek
             var path = GetPath(fileName);
             File.WriteAllText(path, savedLocationString);
         }
-        public void LoadGame(string fileName, GameController gameController)
+        public bool LoadGame(string fileName, GameController gameController)
         {
+           
             var path = GetPath(fileName);
-            var savedGameString=File.ReadAllText(path);
+            string savedGameString = "";
+            if (File.Exists(path))
+            {
+                savedGameString = File.ReadAllText(path);
+            }
+            else return false;
            
             File.Delete(path);
             SavedGame savedGame=JsonSerializer.Deserialize<SavedGame>(savedGameString);
 
             gameController.CurrentLocation = House.GetLocationByName(savedGame.PlayersLocation);
             gameController.MoveNumber = savedGame.MoveNumber;
-
-            
+           
             var foundOpponents= savedGame.FoundOpponentsNames.Select(o => new Opponent(o));
             gameController.foundOpponents.Clear();
             gameController.foundOpponents.AddRange(foundOpponents);
@@ -65,10 +73,7 @@ namespace HideAndSeek
                 location = House.GetLocationByName(opponent.Value);
                 (location as LocationWithHidingPlace).Hide(new Opponent(opponent.Key));
             }
-
-                 
-
-
+            return true;
         }
 
         string GetPath(string fileName)
@@ -77,6 +82,6 @@ namespace HideAndSeek
             var folder = Directory.CreateDirectory(path + Path.DirectorySeparatorChar + "saved_game");
             path = path + Path.DirectorySeparatorChar+"saved_game"+Path.DirectorySeparatorChar + fileName + ".json";
             return path;
-        }
+        }      
     }
 }
