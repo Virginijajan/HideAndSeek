@@ -11,25 +11,20 @@ namespace HideAndSeek
    public class SavedGame
     {
         public string PlayersLocation { get; set; }
-        public Dictionary<string, string> HidingOpponents { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> HidingOpponents { get; set; }
         public List<string> FoundOpponentsNames { get; set; }
         public int MoveNumber { get; set; }
 
         
         public void SaveGame(string fileName, GameController gameController)
-        {
-            
-            
+        {         
             PlayersLocation = gameController.CurrentLocation.Name;
             MoveNumber = gameController.MoveNumber;
             FoundOpponentsNames = new List<string>();
             FoundOpponentsNames.AddRange(gameController.foundOpponents.Select(o => o.Name).ToList());
             HidingOpponents = new Dictionary<string, string>();
            
-            var locations = House.locations.Select(location => location.Value).ToList();
-
-           
-
+            var locations = House.locations.Select(location => location.Value).ToList();        
             foreach(var location in locations)
             {
                 if(location is LocationWithHidingPlace)
@@ -38,42 +33,29 @@ namespace HideAndSeek
                     HidingOpponents[opponent.Name] = location.Name;
                 }
             }
-
-            var savedLocationString = JsonSerializer.Serialize(this);
-
-            var path = GetPath(fileName);
-            File.WriteAllText(path, savedLocationString);
+            WriteFile(fileName);         
         }
         public bool LoadGame(string fileName, GameController gameController)
         {
-           
-            var path = GetPath(fileName);
-            string savedGameString = "";
-            if (File.Exists(path))
+            if (ReadFile(fileName, gameController))
             {
-                savedGameString = File.ReadAllText(path);
+                gameController.CurrentLocation = House.GetLocationByName(gameController.savedGame.PlayersLocation);
+                gameController.MoveNumber = gameController.savedGame.MoveNumber;
+                var foundOpponents = gameController.savedGame.FoundOpponentsNames.Select(o => new Opponent(o));
+                gameController.foundOpponents.Clear();
+                gameController.foundOpponents.AddRange(foundOpponents);
+
+                House.ClearHidingPlaces();
+
+                Location location;
+                foreach (var opponent in gameController.savedGame.HidingOpponents)
+                {
+                    location = House.GetLocationByName(opponent.Value);
+                    (location as LocationWithHidingPlace).Hide(new Opponent(opponent.Key));
+                }
+                return true;
             }
-            else return false;
-           
-            File.Delete(path);
-            SavedGame savedGame=JsonSerializer.Deserialize<SavedGame>(savedGameString);
-
-            gameController.CurrentLocation = House.GetLocationByName(savedGame.PlayersLocation);
-            gameController.MoveNumber = savedGame.MoveNumber;
-           
-            var foundOpponents= savedGame.FoundOpponentsNames.Select(o => new Opponent(o));
-            gameController.foundOpponents.Clear();
-            gameController.foundOpponents.AddRange(foundOpponents);
-
-            House.ClearHidingPlaces();
-
-            Location location;
-            foreach(var opponent in savedGame.HidingOpponents)
-            {
-                location = House.GetLocationByName(opponent.Value);
-                (location as LocationWithHidingPlace).Hide(new Opponent(opponent.Key));
-            }
-            return true;
+            else return false;           
         }
 
         string GetPath(string fileName)
@@ -82,6 +64,27 @@ namespace HideAndSeek
             var folder = Directory.CreateDirectory(path + Path.DirectorySeparatorChar + "saved_game");
             path = path + Path.DirectorySeparatorChar+"saved_game"+Path.DirectorySeparatorChar + fileName + ".json";
             return path;
-        }      
+        }
+        
+        void WriteFile(string fileName)
+        {
+            var savedLocationString = JsonSerializer.Serialize(this);
+            var path = GetPath(fileName);
+            File.WriteAllText(path, savedLocationString);
+        }
+        bool ReadFile(string fileName, GameController gameController)
+        {
+            var path = GetPath(fileName);
+            string savedGameString = "";
+            if (File.Exists(path))
+            {
+                savedGameString = File.ReadAllText(path);
+            }
+            else return false;
+
+            File.Delete(path);
+            gameController.savedGame = JsonSerializer.Deserialize<SavedGame>(savedGameString);
+            return true;
+        }
     }
 }

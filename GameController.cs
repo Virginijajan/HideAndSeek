@@ -110,7 +110,6 @@ namespace HideAndSeek
             }
 
             Direction direction;
-
             if (Enum.TryParse(input, out direction))
             {
                 if (Move(direction))
@@ -144,13 +143,9 @@ namespace HideAndSeek
             
             if (fileName.Count() > 0&&fileName.Count()<20)
             {
-                foreach(var character in prohibitedChar)
-                {
-                    if (fileName.Contains(character))
-                    {
-                        return false;
-                    }
-                }
+                foreach(var character in prohibitedChar)               
+                    if (fileName.Contains(character))                  
+                        return false;   
                 return true;
             }
             return false;
