@@ -1,0 +1,16 @@
+C:\Users\47458\source\repos\HideAndSeek\bin\Debug\net5.0\HideAndSeek.exe
+C:\Users\47458\source\repos\HideAndSeek\bin\Debug\net5.0\HideAndSeek.deps.json
+C:\Users\47458\source\repos\HideAndSeek\bin\Debug\net5.0\HideAndSeek.runtimeconfig.json
+C:\Users\47458\source\repos\HideAndSeek\bin\Debug\net5.0\HideAndSeek.runtimeconfig.dev.json
+C:\Users\47458\source\repos\HideAndSeek\bin\Debug\net5.0\HideAndSeek.dll
+C:\Users\47458\source\repos\HideAndSeek\bin\Debug\net5.0\ref\HideAndSeek.dll
+C:\Users\47458\source\repos\HideAndSeek\bin\Debug\net5.0\HideAndSeek.pdb
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.csproj.AssemblyReference.cache
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.AssemblyInfoInputs.cache
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.AssemblyInfo.cs
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.csproj.CoreCompileInputs.cache
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.dll
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\ref\HideAndSeek.dll
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.pdb
+C:\Users\47458\source\repos\HideAndSeek\obj\Debug\net5.0\HideAndSeek.genruntimeconfig.cache
