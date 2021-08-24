@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace HideAndSeek
 {
-    public class GameController
+    public class GameController:INotifyPropertyChanged
     {
         public SavedGame savedGame = new SavedGame();
         public static string S(int s) => s == 1 ? "" : "s";
@@ -19,6 +20,9 @@ namespace HideAndSeek
 
         public int MoveNumber { get; set; } = 1;
 
+       
+
+
         public readonly IEnumerable<Opponent> Opponents = new List<Opponent>()
         {
              new Opponent("Joe"),
@@ -30,17 +34,25 @@ namespace HideAndSeek
 
         public List<Opponent> foundOpponents = new List<Opponent>();
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnProrertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
         public GameController()
         {
+
             House.ClearHidingPlaces();
             foreach (var opponent in Opponents)
                 opponent.Hide();
 
             CurrentLocation = House.Entry;
+            OnProrertyChanged("Status");
         }
 
         public bool GameOver => Opponents.Count() == foundOpponents.Count();
-
+        public string Message => GameOver ? $"You won the game in {MoveNumber} moves!": "";
         public bool Move(Direction direction)
         {
             if (CurrentLocation.Exits.ContainsKey(direction))
@@ -61,15 +73,10 @@ namespace HideAndSeek
                 if (!ParseFileName(fileName)) return "Invalid file name";
 
                 savedGame.SaveGame(fileName, this);
-                CurrentLocation = House.Entry;
-                MoveNumber = 1;
-                foundOpponents = new List<Opponent>();
-                House.ClearHidingPlaces();
-                foreach (var opponent in Opponents)
-                    opponent.Hide();
-                UpdateStatus();
+
+                NewGame();
                 
-                return ($"Saved current game to {fileName}");
+                return $"Saved current game to {fileName}";
             }
             if (input.Count() >= 4 && input.ToUpper().Substring(0, 4) == "LOAD")
             {
@@ -79,14 +86,16 @@ namespace HideAndSeek
 
                 if (savedGame.LoadGame(fileName, this) == true)
                 {
+                    OnProrertyChanged("MoveNumber");
                     UpdateStatus();
-                    return ($"Loaded game from {fileName}");
+                    return $"Loaded game from {fileName}";
                 }
                 else return "Invalid file name";
             }
             if (input.ToUpper() == "CHECK")
             {
                 MoveNumber++;
+                OnProrertyChanged("MoveNumber");
                 if (CurrentLocation is LocationWithHidingPlace locationWithHidingPlace)
                 {
                     if (locationWithHidingPlace.Opponents.Count > 0)
@@ -94,6 +103,7 @@ namespace HideAndSeek
                         var foundOpponentsNumber = locationWithHidingPlace.Opponents.Count();
                         foundOpponents.AddRange(locationWithHidingPlace.CheckHidingPlace().Select(o => o).ToList());
                         UpdateStatus();
+                        OnProrertyChanged("Message");
                         return $"You found {foundOpponentsNumber} opponent{S(foundOpponentsNumber)} hiding {locationWithHidingPlace.HidingPlace}";
                     }
                     else
@@ -115,12 +125,15 @@ namespace HideAndSeek
                 if (Move(direction))
                 {
                     MoveNumber++;
+                    OnProrertyChanged("MoveNumber");
                     UpdateStatus();
                     return $"Moving {direction}";
                 }
                 else return "There's no exit in that direction";
             }
+
             else return "That's not a valid direction";
+
         }
 
         void UpdateStatus()
@@ -134,6 +147,8 @@ namespace HideAndSeek
             {
                 statusUpdate += Environment.NewLine+"You have found " + foundOpponents.Count + " of " + Opponents.Count() + " opponents: " + string.Join(", ", foundOpponents.Select(o => o.Name).ToList());
             }
+
+            OnProrertyChanged("Status");
         }
 
        public bool ParseFileName(string fileName)
@@ -150,5 +165,18 @@ namespace HideAndSeek
             }
             return false;
         }
+        public void NewGame()
+        {
+            CurrentLocation = House.Entry;
+            MoveNumber = 1;
+            OnProrertyChanged("MoveNumber");
+            foundOpponents = new List<Opponent>();
+            House.ClearHidingPlaces();
+            foreach (var opponent in Opponents)
+                opponent.Hide();
+            UpdateStatus();
+        }
     }
+
+    
 }
